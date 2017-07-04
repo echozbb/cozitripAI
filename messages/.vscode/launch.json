@@ -9,7 +9,8 @@
             "program": "${workspaceRoot}/index.js",
             "cwd": "${workspaceRoot}",
             "env": {
-                "NODE_ENV": "development"
+                "NODE_ENV": "development",
+                "LUIS_MODEL_URL": "https://southeastasia.api.cognitive.microsoft.com/luis/v2.0/apps/e809804e-ea30-409d-99bd-465d4cf5ae75?subscription-key=692ac09ebe28467eb47858b94fd4d4cc&timezoneOffset=0&verbose=true"
             }
         }
     ]
