@@ -39,6 +39,7 @@ console.log("Posting to LUIS server..." + process.env.LUIS_MODEL_URL);
 bot.dialog('/', [
     function (session, args) {
         session.send('Welcome to cozitrip! You can say like this: book 2 rooms from 2017-10-20 to 2017-10-22 in Sydney.')
+        session.send(process.env.LUIS_MODEL_URL);
     }
 ]);
 
