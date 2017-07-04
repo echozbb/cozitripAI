@@ -22,18 +22,23 @@ var connector = useEmulator ? new builder.ChatConnector() : new botbuilder_azure
     openIdMetadata: process.env['BotOpenIdMetadata']
 });
 
-//var bot = new builder.UniversalBot(connector);
-//bot.localePath(path.join(__dirname, './locale'));
+var bot = new builder.UniversalBot(connector);
+bot.localePath(path.join(__dirname, './locale'));
 
-var bot = new builder.UniversalBot(connector, [
-    function (session) {
-        session.send("Welcome to the cozitrip! What can I help you?");
-    }
-]);
+//var bot = new builder.UniversalBot(connector, [
+//    function (session) {
+//        session.send("Welcome to the cozitrip! What can I help you?");
+//    }
+//]);
 
 var recognizer = new builder.LuisRecognizer(process.env.LUIS_MODEL_URL);
 bot.recognizer(recognizer);
 
+bot.dialog('/', [
+    function (session, args) {
+        session.send('Welcome to cozitrip! You can say like this: book 2 rooms from 2017-10-20 to 2017-10-22 in Sydney.')
+    }
+]);
 
 bot.dialog('AskPrice',[
     function (session, args, next){
@@ -43,7 +48,7 @@ bot.dialog('AskPrice',[
         var toDate = builder.EntityRecognizer.findEntity(args.intent.entities, 'date::toDate');
         var roomNum = builder.EntityRecognizer.findEntity(args.intent.entities, 'builtin.number');
         
-        session.send('Welcome to cozitrip hotel finder! We are analyzing your msg: \'%s\'', session.message.text);
+        session.send('We are analyzing your msg: \'%s\'', session.message.text);
        
         if (cityEntity) {
             session.dialogData.searchType = 'city';
