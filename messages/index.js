@@ -43,6 +43,7 @@ bot.dialog('/', [
         session.send("Posting to LUIS server..." + process.env.LUIS_MODEL_URL);
         session.send("process.env.NODE_ENV="+process.env['NODE_ENV']);
         session.send("env:" + JSON.stringify(loaded));
+        session.send('password:' +process.env['MicrosoftAppPassword']);
     }
 ]);
 
