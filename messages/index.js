@@ -5,16 +5,28 @@ https://aka.ms/abs-node-waterfall
 -----------------------------------------------------------------------------*/
 "use strict";
 var loaded = require('dotenv-extended').load();
-console.log(JSON.stringify(loaded));
+
+var LUIS_URL = "";
+var NODE_ENV = "development";
+
+if (loaded) {
+    LUIS_URL = process.env.LUIS_MODEL_URL;
+    NODE_ENV = process.env.NODE_ENV;
+} else {
+    LUIS_URL = process.env['LUIS_MODEL_URL'];
+    NODE_ENV = process.env['BotEnv'];
+}
+
+console.log("Running under env :" + NODE_ENV);
+console.log("Using LUIS URL: " + LUIS_URL);
 
 var builder = require("botbuilder");
 var botbuilder_azure = require("botbuilder-azure");
 var path = require('path');
 var Store = require('./store');
 var spellService = require('./spell-service');
+var useEmulator = (NODE_ENV == 'development');
 
-var useEmulator = (process.env.NODE_ENV == 'development');
-console.log("process.env.NODE_ENV="+process.env.NODE_ENV);
 
 var connector = useEmulator ? new builder.ChatConnector() : new botbuilder_azure.BotServiceConnector({
     appId: process.env['MicrosoftAppId'],
@@ -32,17 +44,15 @@ bot.localePath(path.join(__dirname, './locale'));
 //    }
 //]);
 
-var recognizer = new builder.LuisRecognizer(process.env.LUIS_MODEL_URL);
+var recognizer = new builder.LuisRecognizer(LUIS_URL);
 bot.recognizer(recognizer);
 
-console.log("Posting to LUIS server..." + process.env.LUIS_MODEL_URL);
 
 bot.dialog('/', [
     function (session, args) {
         session.send('Welcome to cozitrip! You can say like this: book 2 rooms from 2017-10-20 to 2017-10-22 in Sydney.');
-        session.send("Posting to LUIS server..." + process.env.LUIS_MODEL_URL);
-        session.send("process.env.NODE_ENV="+process.env['NODE_ENV']);
-        session.send("env:" + JSON.stringify(loaded));
+        session.send("Posting to LUIS server..." + LUIS_URL);
+        session.send("process.env.NODE_ENV=" + NODE_ENV);
         session.send('password:' +process.env['MicrosoftAppPassword']);
     }
 ]);
