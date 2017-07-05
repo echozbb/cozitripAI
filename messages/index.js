@@ -4,7 +4,8 @@ For a complete walkthrough of creating this type of bot see the article at
 https://aka.ms/abs-node-waterfall
 -----------------------------------------------------------------------------*/
 "use strict";
-require('dotenv-extended').load();
+var loaded = require('dotenv-extended').load();
+console.log(JSON.stringify(loaded));
 
 var builder = require("botbuilder");
 var botbuilder_azure = require("botbuilder-azure");
@@ -41,6 +42,7 @@ bot.dialog('/', [
         session.send('Welcome to cozitrip! You can say like this: book 2 rooms from 2017-10-20 to 2017-10-22 in Sydney.');
         session.send("Posting to LUIS server..." + process.env.LUIS_MODEL_URL);
         session.send("process.env.NODE_ENV="+process.env['NODE_ENV']);
+        session.send("env:" + JSON.stringify(loaded));
     }
 ]);
 
