@@ -6,6 +6,7 @@ https://aka.ms/abs-node-waterfall
 "use strict";
 var loaded = require('dotenv-extended').load();
 
+
 var LUIS_URL = "";
 var NODE_ENV = "development";
 
@@ -24,6 +25,7 @@ var builder = require("botbuilder");
 var botbuilder_azure = require("botbuilder-azure");
 var path = require('path');
 var Store = require('./store');
+var Hotel = require('./hotel-service');
 var spellService = require('./spell-service');
 var useEmulator = (NODE_ENV == 'development');
 
@@ -51,9 +53,6 @@ bot.recognizer(recognizer);
 bot.dialog('/', [
     function (session, args) {
         session.send('Welcome to cozitrip! You can say like this: book 2 rooms from 2017-10-20 to 2017-10-22 in Sydney.');
-        session.send("Posting to LUIS server..." + LUIS_URL);
-        session.send("process.env.NODE_ENV=" + NODE_ENV);
-        session.send('password:' +process.env['MicrosoftAppPassword']);
     }
 ]);
 
@@ -69,21 +68,48 @@ bot.dialog('AskPrice',[
        
         if (cityEntity) {
             session.dialogData.searchType = 'city';
+            console.log("type" + cityEntity.type);
+            console.log("startIndex" + cityEntity.startIndex);
+            console.log("resolution" + cityEntity.resolution);
+            console.log("resolution.values" + cityEntity.resolution.values);
+            
             session.dialogData.cityName = cityEntity.entity;
-        } 
+            session.dialogData.cityCode = cityEntity.resolution.values;
+        } else {
+            console.log("input city is null");
+            //builder.Prompts.text("Please tell me where you want go?");
+            var result = session.beginDialog('askForCity');
+            console.log("result of askForCity:" + session.userData.cityName);
+            session.dialogData.cityName = session.userData.cityName;
+            console.log("session.dialogData.cityName = " + session.dialogData.cityName );
+        }
         if (fromDate) {
             session.dialogData.fromDate = fromDate.entity;
+        } else {
+            builder.Prompts.time("Please tell me your check-in date");
         }
+        
         if (toDate) {
             session.dialogData.toDate = toDate.entity;
+        } else {
+            builder.Prompts.time("Please tell me your check-out date");
         }
         if (roomNum) {
             session.dialogData.RoomNum = roomNum.entity;
+        } else {
+            builder.Prompts.number("How many rooms do you want to book?");
         }
-        next({ response: cityEntity.entity });
+        console.log("session.dialogData.cityName = " + session.dialogData.cityName );
+        console.log("session.dialogData.fromDate = " + session.dialogData.fromDate );
+        console.log("session.dialogData.toDate = " + session.dialogData.toDate);
+        next({ response: session.dialogData.cityName });
     },
+//    function (session, result, next) {
+//        session.send("you want to go to " + result);
+//        next({ response: cityEntity.entity });
+//    },
     function (session, results) {
-            var message = 'Looking for hotels in ' + session.dialogData.cityName;
+            var message = 'Looking for hotels in ' + session.dialogData.cityName + ', please wait a while.';
             message += '<br> Room number:' + session.dialogData.RoomNum;
             message += '<br> checkin at ' + session.dialogData.fromDate;
             message += '<br> checkout at ' + session.dialogData.toDate;
@@ -93,13 +119,23 @@ bot.dialog('AskPrice',[
             
             session.send(message, destination);
         
-        Store.searchHotel(destination, checkin, checkout)
-            .then(function (hotels) {
-                var message = new builder.Message()
+        Hotel.getRoomTypes('').then(function(rooms){
+            console.log('We find rooms: ' + JSON.stringify(rooms[0]));
+            //session.send(JSON.stringify(rooms[0]));
+            var message = new builder.Message()
                     .attachmentLayout(builder.AttachmentLayout.carousel)
-                    .attachments(hotels.map(hotelAsAttachment));
+                    .attachments(rooms.map(roomAsAttachment));
                 session.send(message);
-            });
+        });
+        
+        
+//        Store.searchHotel(destination, checkin, checkout)
+//            .then(function (hotels) {
+//                var message = new builder.Message()
+//                    .attachmentLayout(builder.AttachmentLayout.carousel)
+//                    .attachments(hotels.map(hotelAsAttachment));
+//                session.send(message);
+//            });
          //End
         session.endDialog();
 
@@ -108,6 +144,21 @@ bot.dialog('AskPrice',[
     matches: 'AskPrice'
 });
 
+
+// Dialog to ask for city
+bot.dialog('askForCity', [
+    function (session) {
+        console.log("Starting in askForCity");
+        builder.Prompts.text(session, "Please tell me where you want go?");
+    },
+    function (session, results) {
+        session.send("ok, you want to go " + results.response);
+        //session.dialogData.cityName = results.response;
+        session.userData.cityName = results.response;
+        session.endDialogWithResult(results);
+       // next();
+    }
+]);
 
 bot.dialog('Help', function (session) {
     session.endDialog('Hi! Try asking me things like /2017-10-20 to 2017-10-22 in Sydney, 2 rooms/');
@@ -139,6 +190,19 @@ function hotelAsAttachment(hotel) {
         .title(hotel.name)
         .subtitle('%d stars. %d reviews. From $%d per night.', hotel.rating, hotel.numberOfReviews, hotel.priceStarting)
         .images([new builder.CardImage().url(hotel.image)])
+        .buttons([
+            new builder.CardAction()
+                .title('More details')
+                .type('openUrl')
+                .value('https://b2bweb-uat.cozitrip.com/#/home')
+        ]);
+}
+
+function roomAsAttachment(room) {
+    return new builder.HeroCard()
+        .title(room.roomName)
+        .subtitle('From $%d.', room.price)
+        .images([new builder.CardImage().url(room.image)])
         .buttons([
             new builder.CardAction()
                 .title('More details')
