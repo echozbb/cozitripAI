@@ -4,7 +4,7 @@ For a complete walkthrough of creating this type of bot see the article at
 https://aka.ms/abs-node-waterfall
 -----------------------------------------------------------------------------*/
 "use strict";
-var loaded = require('dotenv-extended').load('./.env');
+var loaded = require('dotenv-extended');
 var format = require('string-format');
 //const LUISClient = require("./luis_sdk");
 
