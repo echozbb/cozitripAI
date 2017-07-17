@@ -4,11 +4,13 @@
   "description": "",
   "main": "index.js",
   "dependencies": {
+    "array-unique": "^0.3.2",
     "bluebird": "^3.5.0",
     "botbuilder": "^3.7.0",
     "botbuilder-azure": "3.0.2",
     "dotenv-extended": "^2.0.1",
-    "restify": "^4.3.0"
+    "restify": "^4.3.0",
+    "string-format": "^0.5.0"
   },
   "devDependencies": {},
   "scripts": {

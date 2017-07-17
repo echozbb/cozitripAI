@@ -1,17 +1,33 @@
-var Cozi = require('./cozi-service.js');
-var Domain = require('./domain.js');
+var Cozi = require('./cozi-service');
+var functions = require('./functions');
+//var Domain = require('./domain');
 
 var response = Cozi.Get('/b2bWeb/checkConnection', function(data) {
     console.log("XXXXXXX Got GET response: " + data);
 });
 
-var multiRoomRequest = Domain.MultiRoomRequest;
-console.log(multiRoomRequest.arrival);
+//var multiRoomRequest = Domain.MultiRoomRequest;
+//console.log(multiRoomRequest.arrival);
 
 module.exports = {
-    getRoomTypes : function (hotelUuid) {
+    checkConnection: function (){
+        console.log('check connection method add here.');
+    },
+    
+    getHotelInfo : function (hotelUuid) {
+      return new Promise (function (resolve) {
+          var getResponse = Cozi.Get('/api/getHotelInfo/' + hotelUuid, function(data) {
+              var hotelInfo = JSON.parse(data).payload;
+              console.log('get hotelInfo -> ' + JSON.stringify(hotelInfo));
+              
+              setTimeout(function () { resolve(hotelInfo); }, 1000);
+          });
+      });  
+    },
+    
+    getRoomTypes : function (hotelUuid, multiRoomRequest) {
         return new Promise (function (resolve){
-                    var postResponse = Cozi.Post('/api/getRoomTypes/0a5612bb-d8a5-4577-9de2-c1ee80a4922a?cid=CZTSYDA001&token=32d79b60-f075-49e1-baea-a9145fcd8361', multiRoomRequest, function(data) {
+                    var postResponse = Cozi.Post('/api/getRoomTypes/'+hotelUuid, multiRoomRequest, function(data) {
             //console.log('XXXXXXX Got POST response: ' + data)
             var roomTypes = JSON.parse(data).payload;
 
@@ -19,29 +35,30 @@ module.exports = {
             var rooms = [];
             for (var i = 1; i <= roomTypes.length; i++) {
                 console.log('processing room ' + i);
-                console.log(roomTypes[i]);
+                //console.log(roomTypes[i]);
                 if (roomTypes[i]) {
                     rooms.push({
                             roomName: roomTypes[i].roomDescription,
-                            price: roomTypes[i].rateInfos[0].chargeableRate.total,
+                            price: Math.round(roomTypes[i].rateInfos[0].chargeableRate.total),
                             checkin: multiRoomRequest.checkin,
                             checkout: multiRoomRequest.checkout,
-                            image: 'http://cozi-uat-images.oss-cn-hongkong.aliyuncs.com/b2b/hotels/AU/SYD/MH2MS-6865.jpg'
+                            breakfast: roomTypes[i].rateInfos[0].mealsPlan.description,
+                            freeCancellation: roomTypes[i].rateInfos[0].freeCancellation
+                            //image: 'http://cozi-uat-images.oss-cn-hongkong.aliyuncs.com/b2b/hotels/AU/SYD/MH2MS-6865.jpg'
                         });
                 }
 
             }
+            rooms = functions.removeDuplicates(rooms, 'roomName');
+            rooms.sort(function (a, b) { return a.price - b.price; });
+                 
             // complete promise with a timer to simulate async response
             setTimeout(function () { resolve(rooms); }, 1000);
         });
-
-            //Domain.RoomType = roomTypes[0];
-            //console.log('Room1 ->');
-            //console.log(Domain.RoomType);
-            //roomTypes = JSON.parse(data.payload);
         });
 
-    }
+    },
+    
 }
 
 

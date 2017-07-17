@@ -31,6 +31,7 @@ function option(path, method){
 
 module.exports = {
     Get: function (path, cb) {
+        path = path + '?cid=' + process.env.COZI_APP_ID + '&token=' + process.env.COZI_APP_TOKEN
         //var options = default_option;
         var options = new option(path, 'GET');
         //options.path = path;
@@ -56,9 +57,9 @@ module.exports = {
     },
    
     Post: function (path, resquestBody, cb) {
+        path = path + '?cid=' + process.env.COZI_APP_ID + '&token=' + process.env.COZI_APP_TOKEN
         var options = new option(path, 'POST');
         jsonObject = JSON.stringify(resquestBody);
-        
         var reqPost = https.request(options, function(res){
             console.log('Calling POST cozitrip service ...' + options.path);
             console.log('STATUS: ' + res.statusCode);
@@ -74,14 +75,13 @@ module.exports = {
             });
 
         });
+        console.log('RequestBody: ' + jsonObject);
         reqPost.write(jsonObject);
         reqPost.end();
         reqPost.on('error', function(e){
             console.log(e);
-        });
-                                   
+        });                
     }
-
 }
 
 
