@@ -19,23 +19,13 @@ if (process.env.APPID) {
 module.exports = {
     
    saveEntities: function (builder, args, session) {
-       console.log('start to saving result to session....');
-//       if (args.intent) {
-//            var cityEntity = builder.EntityRecognizer.findEntity(args.intent.entities, 'city');
-//            var fromDate = builder.EntityRecognizer.findEntity(args.intent.entities, 'date::fromDate');
-//            var toDate = builder.EntityRecognizer.findEntity(args.intent.entities, 'date::toDate');
-//            var roomNum = builder.EntityRecognizer.findEntity(args.intent.entities, 'builtin.number');
-//            var hotelEntity = builder.EntityRecognizer.findEntity(args.intent.entities, 'hotelName');
-//            var indBreakfast = builder.EntityRecognizer.findEntity(args.intent.entities, 'breakfastInd');
-//       
-//       } else {
-           var cityEntity = builder.EntityRecognizer.findEntity(args.entities, 'city');
-            var fromDate = builder.EntityRecognizer.findEntity(args.entities, 'date::fromDate');
-            var toDate = builder.EntityRecognizer.findEntity(args.entities, 'date::toDate');
-            var roomNum = builder.EntityRecognizer.findEntity(args.entities, 'builtin.number');
-            var hotelEntity = builder.EntityRecognizer.findEntity(args.entities, 'hotelName');
-            var indBreakfast = builder.EntityRecognizer.findEntity(args.entities, 'breakfastInd');
-     //  }
+        console.log('start to saving result to session....');
+        var cityEntity = builder.EntityRecognizer.findEntity(args.entities, 'city');
+        var fromDate = builder.EntityRecognizer.findEntity(args.entities, 'date::fromDate');
+        var toDate = builder.EntityRecognizer.findEntity(args.entities, 'date::toDate');
+        var roomNum = builder.EntityRecognizer.findEntity(args.entities, 'builtin.number');
+        var hotelEntity = builder.EntityRecognizer.findEntity(args.entities, 'hotelName');
+        var indBreakfast = builder.EntityRecognizer.findEntity(args.entities, 'breakfastInd');
        
         session.dialogData.cityEntity = cityEntity;
         session.dialogData.fromDate = fromDate;
@@ -43,19 +33,6 @@ module.exports = {
         session.dialogData.hotelEntity = hotelEntity;
         session.dialogData.indBreakfast = indBreakfast;
         session.dialogData.roomNum = roomNum;
-    },
-    
-    extractLuis: function (query) {
-        return new Promise (function (resolve){
-            var response = LUISclient.predict(query, {
-                 onSuccess: function (response) {
-                     console.log('LUIS RESPONSE: ' + JSON.stringify(response));
-                     setTimeout(function () { resolve(response); }, 1000);
-                 },
-                 onFailure: function (err) {console.error(err);}
-            });
-            
-        })    
     },
     
     removeDuplicates: function (arr, key) {

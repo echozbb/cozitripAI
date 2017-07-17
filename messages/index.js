@@ -6,24 +6,30 @@ https://aka.ms/abs-node-waterfall
 "use strict";
 var loaded = require('dotenv-extended').load('./.env');
 var format = require('string-format');
-//const LUISClient = require("./luis_sdk");
+const LUISClient = require("./luis_sdk");
 
 var LUIS_URL = "";
 var NODE_ENV = "development";
+var APPID="";
+var APPKEY="";
 
 if (loaded) {
     LUIS_URL = process.env.LUIS_MODEL_URL;
     NODE_ENV = process.env.NODE_ENV;
+    APPID = process.env.APPID;
+    APPKEY = process.env.APPKEY;
 } else {
     LUIS_URL = process.env['LUIS_MODEL_URL'];
     NODE_ENV = process.env['BotEnv'];
+    APPID = process.env['APPID'];
+    APPKEY = process.env['APPKEY'];
 }
 
-//var LUISclient = LUISClient({
-//  appId: process.env.APPID,
-//  appKey: process.env.APPKEY,
-//  verbose: true
-//});
+var LUISclient = LUISClient({
+ appId: APPID,
+ appKey: APPKEY,
+ verbose: true
+});
 
 
 console.log("Running under env :" + NODE_ENV);
@@ -126,7 +132,7 @@ bot.dialog('AskPrice',[
         console.log('Full query is :' + query);
         if (isRemap) {
             //functions.extractLuis(query).then( functions.saveEntities(builder, response, session));
-            functions.extractLuis(query).then(function (response) {
+            extractLuis(query).then(function (response) {
                 //console.log('got response: ' + JSON.stringify(response));
                 //var agrs = response;
                 functions.saveEntities(builder, response, session);
@@ -315,7 +321,18 @@ function printOnSuccess (response) {
   }
 }
 
-
+function extractLuis (query) {
+        return new Promise (function (resolve){
+            var response = LUISclient.predict(query, {
+                 onSuccess: function (response) {
+                     console.log('LUIS RESPONSE: ' + JSON.stringify(response));
+                     setTimeout(function () { resolve(response); }, 1000);
+                 },
+                 onFailure: function (err) {console.error(err);}
+            });
+            
+        })    
+}
 
 if (useEmulator) {
     var restify = require('restify');
