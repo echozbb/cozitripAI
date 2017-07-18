@@ -51,9 +51,6 @@ var LUISResponse = require("./luis_response");
  * @returns {{predict: predict, reply: reply}} an object containing the functions that need to be used
  */
 var LUISClient = function(initData) {
-  initData.appId = "e809804e-ea30-409d-99bd-465d4cf5ae75";
-  initData.appKey = "e62bf08e8fab4c27a1dfe7c23892c595";
-  initData.verbose = true;
   validateInitData(initData);
   var appId = initData.appId;
   var appKey = initData.appKey;

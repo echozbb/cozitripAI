@@ -6,7 +6,6 @@ https://aka.ms/abs-node-waterfall
 "use strict";
 var loaded = require('dotenv-extended').load('./.env');
 var format = require('string-format');
-const LUISClient = require("./luis_sdk");
 
 var LUIS_URL = "";
 var NODE_ENV = "development";
@@ -16,21 +15,16 @@ var APPKEY="";
 if (loaded) {
     LUIS_URL = process.env.LUIS_MODEL_URL;
     NODE_ENV = process.env.NODE_ENV;
-    APPID = process.env.APPID;
-    APPKEY = process.env.APPKEY;
+    APPID = process.env.LUIS_APPID;
+    APPKEY = process.env.LUIS_APPKEY;
 } else {
     LUIS_URL = process.env['LUIS_MODEL_URL'];
     NODE_ENV = process.env['BotEnv'];
-    APPID = process.env['APPID'];
-    APPKEY = process.env['APPKEY'];
+    APPID = process.env['LUIS_APPID'];
+    APPKEY = process.env['LUIS_APPKEY'];
 }
-
-var LUISclient = LUISClient({
- appId: "e809804e-ea30-409d-99bd-465d4cf5ae75",
- appKey: "e62bf08e8fab4c27a1dfe7c23892c595",
- verbose: true
-});
-
+console.log('APPID=' + APPID);
+console.log('APPKEY=' + APPKEY);
 
 console.log("Running under env :" + NODE_ENV);
 console.log("Using LUIS URL: " + LUIS_URL);
@@ -44,12 +38,19 @@ var Domain = require('./domain');
 var spellService = require('./spell-service');
 var useEmulator = (NODE_ENV == 'development');
 var functions = require('./functions');
+const LUISClient = require("./luis_sdk");
 
 var connector = useEmulator ? new builder.ChatConnector() : new botbuilder_azure.BotServiceConnector({
     appId: process.env['MicrosoftAppId'],
     appPassword: process.env['MicrosoftAppPassword'],
     stateEndpoint: process.env['BotStateEndpoint'],
     openIdMetadata: process.env['BotOpenIdMetadata']
+});
+
+var LUISclient = LUISClient({
+ appId: APPID,
+ appKey: APPKEY,
+ verbose: true
 });
 
 var bot = new builder.UniversalBot(connector);

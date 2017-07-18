@@ -1,21 +1,3 @@
-const LUISClient = require("./luis_sdk");
-
-var LUISclient = null;
-if (process.env.APPID) {
-    var LUISclient = LUISClient({
-      appId: process.env.APPID,
-      appKey: process.env.APPKEY,
-      verbose: true
-    });
-} else {
-    var LUISclient = LUISClient({
-      appId: process.env['APPID'],
-      appKey: process.env['APPKEY'],
-      verbose: true
-    });
-}
-
-
 module.exports = {
     
    saveEntities: function (builder, args, session) {
