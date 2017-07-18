@@ -26,8 +26,8 @@ if (loaded) {
 }
 
 var LUISclient = LUISClient({
- appId: APPID,
- appKey: APPKEY,
+ appId: "e809804e-ea30-409d-99bd-465d4cf5ae75",
+ appKey: "e62bf08e8fab4c27a1dfe7c23892c595",
  verbose: true
 });
 
